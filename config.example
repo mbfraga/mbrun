@@ -1,0 +1,4 @@
+[mbmain]
+show_mesg = False
+bind_enable = alt-e
+bind_disable = alt-d

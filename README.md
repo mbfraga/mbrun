@@ -27,6 +27,10 @@ inspiration from any of these scripts for your own personal needs.
 * helpers/mbrofi.py -- helper script that is used in virtually every other
                        script in here.
 
+* ~/.config/mbrun/config -- configuration file following ini format. It is
+    meant to be able to set configurations for every script, without adding
+    hard dependencies on the scripts themselves. See section below on
+    __adding configuration__ for more info.
 
 ## dependencies
 
@@ -60,3 +64,93 @@ dependencies for each script.
     move to plain text files for bookmark management)
 
     - [buku](https://github.com/jarun/Buku)
+
+
+## adding configuration
+
+To add a configuration to a script, you have to first start by giving it a
+somewhat unique identifier (could be just the name of the script). In this
+example the identifier is **template**. Note that in this explanation I start
+by showing how to set the configuration itself. Ideally, the configuration file
+doesn't need to have any values set. The script should parse this in a way that
+it can handle configurations not specifically defined in the config file.
+
+We start by going to the config file in `~/.config/mbrun/config` and adding the
+header as follows:
+
+```ini
+[template]
+```
+
+We want to add bindings for opening a file and deleting a file, and a setting
+to enable or disable the message in rofi. To do this we need to add any key
+name we want and the value. See the following example:
+
+```ini
+[template]
+bind_open = alt-o
+bind_delete = alt-d
+show_mesg = False
+```
+
+Note that I could have chosen any names for the keys instead of bind_open,
+bind_delete, and show_mesg. The only requirement is that you use the same name
+in your script.
+
+Now we go to the script itself, where we have to parse these settings. We start
+by calling `mbrofi.parse_config()` and storing its value in a variable that
+i'll name mbconfig.
+
+```python
+from helpers import mbrofi
+
+mbcofig = mbrofi.parse_config()
+```
+
+We start by setting some default values (I will choose different ones than
+those set in the configuration file to make things clear) for the variables we
+want to handle via the config file. We should also set a variable to be the
+identifier we settled on before, **template**, and start an **if** block that
+will check if there are any actual configuration values for **template** in
+`~/.config/mbrun/config`.  Else the default values are kept. This allows us to
+gracefully make the configuration file optional.
+
+```python
+from helpers import mbrofi
+
+mbconfig = mbrofi.parse_config()
+bind_open = 'alt-n'
+bind_delete = 'alt-g'
+show_mesg = True
+script_ident = "template"
+if script_indent in mbconfig:
+   pass
+
+```
+
+We create a variable to hold the configurations specific to the identifier we
+care about--just for convenience. Finally, we can use the `get()`,
+`getboolean()` and other methods in ConfigParser to set the variables to what
+was defined in the configuration file. We can also be safe by adding fallbacks
+(I don't think this is technically necessary).
+
+```python
+from helpers import mbrofi
+
+mbconfig = mbrofi.parse_config()
+bind_open = 'alt-n'
+bind_delete = 'alt-g'
+show_mesg = True
+script_ident = "template"
+if script_indent in mbconfig:
+   tempconf = mbconfig[script_ident]
+   show_mesg = tempconf.getboolean("show_mesg", fallback=True)
+   bind_enable = tempconf.get("bind_enable", fallback='alt-n')
+   bind_disable = tempconf.get("bind_disable", fallback='alt+g')
+
+```
+
+These 10 lines are all that is needed to give your script the ability to have
+configurations in `~/.config/mbrun/config`. 
+
+

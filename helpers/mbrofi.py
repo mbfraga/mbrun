@@ -9,6 +9,7 @@ import struct
 from stat import ST_CTIME, ST_ATIME, ST_MTIME, ST_SIZE
 from operator import itemgetter
 
+from configparser import ConfigParser
 
 __version__ = '0.0'
 __author__  = 'Martin B. Fraga <mbfraga@gmail.com>'
@@ -478,7 +479,18 @@ class FileRepo:
 
         return(grep_file_repo)
 
+### TESTING
+
+def parse_config(config_path=None):
+    """Parse a configuration file, and return the ConfigParser class result"""
+    if config_path is None:
+        config_path = os.path.expanduser('~/.config/mbrun/')
+    full_path = os.path.join(config_path, 'config')
+    config = ConfigParser()
+    config.read(full_path)
+
+    return(config)
 
 if __name__ == "__main__":
-    print(get_clip())
+    parse_config()
 #EOF
