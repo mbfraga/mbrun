@@ -65,6 +65,49 @@ dependencies for each script.
 
     - [buku](https://github.com/jarun/Buku)
 
+* define.py
+   - sdcv
+   - You can define your favorite dictionary file, but make sure you have one,
+       otherwise sdcv doesn't do anything. Default: dictd_www.dict.org_gcide
+
+* thesaurus.py
+   - sdcv
+   - You can define your favorite dictionary file, but make sure you have one,
+       otherwise sdcv doesn't do anything. Default: Moby Thesaurus II 
+
+
+## installation
+
+Start by cloning the repository. Make sure all the dependencies are met for the
+scripts that you actually want to use.
+
+```bash
+cd ~/gitland
+git clone https://github.com/mbfraga/mbrun
+```
+For now, you have to keep all the files here in the same directory. The only
+thing you need is to put mbmain in PATH. A simple symlink is enough here. For
+this example I'll put it in `~/bin`, but you have to make sure that it actually
+is in PATH.
+
+```bash
+ln -s /home/mbfraga/gitland/mbrun/mbmain ~/bin/
+```
+
+Copy the example configuration to the config directory and name it **config**.
+Edit this configuration however you want.
+
+```bash
+mkdir ~/.config/mbrun
+cp config.example ~/.config/mbrun/config
+```
+
+Now you can use mbmain through cli commands, or run mbmain to get the rofi
+interface. Either way you can enable and disable scripts. You can then use
+plain mbmain as a global launcher. For example, you can map it in i3 to
+something like `Mod4+f`.
+
+
 
 ## adding configuration
 
