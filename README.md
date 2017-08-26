@@ -15,6 +15,18 @@ For many of these, they can be trivially made to be standalone by copying the
 few functions from mbrofi that they rely on. Please feel free to use or get
 inspiration from any of these scripts for your own personal needs.
 
+## list of scripts
+* template.py -- does nothing. Only serves as a template to build new scripts.
+* amazon.py -- do an amazon search
+* google.py -- do a google search
+* youtube.py -- do a youtube search
+* define.py -- define word using sdcv dictionary application
+* thesaurus.py -- find synonyms for words using sdcv dictionary application
+* screenshots.py -- manage screenshot directory. preview/rename/upload screenshots. Uploads to ptpb.pw for now.
+* sshot.py -- take screenshots of specific monitors, whole screen, a selected window, or a custom selection. Upload/delay
+              supported. Uploads to ptpb.pw for now, and uses screenshots.py for interactive mode.
+* buku.py -- serves as a simple rofi interface for buku bookmark manager.
+
 
 ## layout
 
