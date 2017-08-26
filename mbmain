@@ -12,17 +12,17 @@ SCRIPTS_IGNORE = ['mbmain', 'README.md', 'config.example']
 from helpers import mbrofi
 
 show_mesg = True
-bind_enable = 'alt+e'
-bind_disable = 'alt+d'
+bind_enable = 'alt-e'
+bind_disable = 'alt-d'
 script_id = 'mbmain'
 config = mbrofi.parse_config()
 if script_id in config:
     lconf = config[script_id]
     show_mesg = lconf.getboolean("show_mesg", fallback=True)
-    bind_enable = lconf.get("bind_enable", fallback='alt+e')
-    bind_disable = lconf.get("bind_disable", fallback='alt+d')
+    bind_enable = lconf.get("bind_enable", fallback='alt-e')
+    bind_disable = lconf.get("bind_disable", fallback='alt-d')
 
-bindings=['alt+h', bind_enable, bind_disable]
+bindings=['alt-h', bind_enable, bind_disable]
 mesg = "Run script. Press " + bindings[0] + " for help."
 prompt = "mbrun:"
 sel=""

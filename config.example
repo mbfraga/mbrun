@@ -10,3 +10,11 @@ rofi_lines = None
 [thesaurus]
 thesaurus_file = Moby Thesaurus II
 rofi_lines = None
+
+[screenshots]
+bind_upload = alt-u
+bind_preview = alt-p
+bind_rename = alt-r
+bind_sortname = alt-1
+bind_sortdate = alt-2
+bind_sortsize = alt-3
