@@ -12,6 +12,7 @@ thesaurus_file = Moby Thesaurus II
 rofi_lines = None
 
 [screenshots]
+screenshot_directory = ~/Pictures/screenshots/
 bind_upload = alt-u
 bind_preview = alt-p
 bind_rename = alt-r

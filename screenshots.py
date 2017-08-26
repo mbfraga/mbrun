@@ -58,7 +58,7 @@ SCREENSHOT_DIRECTORY = os.path.expanduser(screenshot_directory)
 
 if not (os.path.isdir(SCREENSHOT_DIRECTORY)):
     print('Creating ' + SCREENSHOT_DIRECTORY + '...')
-    os.makedir(SCREENSHOT_DIRECTORY)
+    os.makedirs(SCREENSHOT_DIRECTORY)
 
 # run correct launcher with prompt and help message
 launcher_args = {}
@@ -195,8 +195,11 @@ def main():
             # this is the case where rofi is escaped (should exit)
             break
         elif (exit == 10):
+            message = "List of bindings with descriptions. Press alt-h"
+            message += " to go back. Screenshot directory: '"
+            message += SCREENSHOT_DIRECTORY + "'"
             mbrofi.rofi_help(launcher_args['bindings'], BIND_HELPLIST
-                            , prompt='screenshots help:')
+                            , prompt='screenshots help:', message=message)
         elif (exit == 11):
             print('uploading ' + sel)
             pasteurl = upload(sel)

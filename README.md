@@ -23,9 +23,12 @@ inspiration from any of these scripts for your own personal needs.
 * define.py -- define word using sdcv dictionary application
 * thesaurus.py -- find synonyms for words using sdcv dictionary application
 * screenshots.py -- manage screenshot directory. preview/rename/upload screenshots. Uploads to ptpb.pw for now.
-* sshot.py -- take screenshots of specific monitors, whole screen, a selected window, or a custom selection. Upload/delay
-              supported. Uploads to ptpb.pw for now, and uses screenshots.py for interactive mode.
-* buku.py -- serves as a simple rofi interface for buku bookmark manager.
+* sshot.py [pending]-- take screenshots of specific monitors, whole screen, a
+                        selected window, or a custom selection. Upload/delay
+                        supported. Uploads to ptpb.pw for now, and uses
+                        screenshots.py for interactive mode.
+* buku.py [pending]-- serves as a simple rofi interface for buku bookmark
+                      manager.
 
 
 ## layout
