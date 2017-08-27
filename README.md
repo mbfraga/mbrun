@@ -23,7 +23,7 @@ inspiration from any of these scripts for your own personal needs.
 * define.py -- define word using sdcv dictionary application
 * thesaurus.py -- find synonyms for words using sdcv dictionary application
 * screenshots.py -- manage screenshot directory. preview/rename/upload screenshots. Uploads to ptpb.pw for now.
-* sshot.py [pending]-- take screenshots of specific monitors, whole screen, a
+* sshot.py -- take screenshots of specific monitors, whole screen, a
                         selected window, or a custom selection. Upload/delay
                         supported. Uploads to ptpb.pw for now, and uses
                         screenshots.py for interactive mode.
@@ -63,14 +63,8 @@ Ideally I will make getting them as easy as possible. Below is a list of the
 dependencies for each script.
 
 * sshot.py
-
-   - Depends on my homebaked script
-       [sshot](https://github.com/mbfraga/scripts/blob/master/sshot)
-       which requires the additional following dependencies:
-       * xrandr
-       * maim
-       * curl
-       * xclip
+   - xrandr
+   - maim
 
 * screenshots.py
    - python-requests

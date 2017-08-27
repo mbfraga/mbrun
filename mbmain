@@ -86,8 +86,6 @@ def enable_script(scriptname):
         for s in valid_scripts:
             print(s)
         sys.exit(1)
-    if not (os.path.isdir(enabled_path)):
-        os.makedirs(enabled_path)
     spath = os.path.join(scripts_path, scriptname)
     epath = os.path.join(enabled_path, scriptname)
     if not os.path.isfile(spath):
@@ -125,6 +123,8 @@ def main_function(mlist=[]):
 
 
 if __name__ == "__main__":
+    if not (os.path.isdir(enabled_path)):
+        os.makedirs(enabled_path)
     if len(sys.argv) == 1:
         while True:
             enabledfiles, displaynames = get_scripts(enabled_path)

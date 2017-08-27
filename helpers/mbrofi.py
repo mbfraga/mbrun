@@ -479,6 +479,63 @@ class FileRepo:
 
         return(grep_file_repo)
 
+def upload_ptpb(rootpath, filename, notify_bool=True, name="File"):
+    """Upload file to ptpb.pw and notify via notify-send.
+
+    Keyword arguments:
+    rootpath -- root path for file.
+    filename -- name of file.
+    notify_bool -- boolean on whether or not to send notification (default True)
+    name -- name used to generate nicer notifications (default File).
+        """
+    from requests import Session, adapters, exceptions
+
+    filepath = os.path.join(rootpath, filename)
+    if not os.path.isfile(filepath):
+        print("File not found in '" + filepath + "'.")
+        return(False)
+    url = "https://ptpb.pw"
+    files = {'c': open(filepath, 'rb')}
+    opts = {'p':'1', 'sunset':'432000'}
+
+    s = Session()
+    a = adapters.HTTPAdapter(max_retries=3)
+    s.mount('https://', a)
+    try:
+        rh = s.get(url)
+    except exceptions.RequestException as e:
+        print("Error: Failed to connect to " + url)
+        notify( name + ":", 
+                      name + " '" + filename + "'could not be uploaded."
+                        + " Failed to connect to " + url)
+        return False
+
+    if not (rh.status_code == 200):
+        print("Error: Failed to connect to " + url)
+        print(rh.status_code)
+        if notify_bool:
+            notify(name + ":", name + " " + filename + "could not be uploaded."
+                        + " Failed to connect to " + url)
+        return False
+
+    r = s.post(url + "/?u=1", files = files, data = opts)
+    if (r.status_code == 200):
+        pasteurl = r.text
+        if notify_bool:
+            notify(name + ":", name + " " + filename + " uploaded to:"
+                        + " " + url)
+    else:
+        if notify_bool:
+            notify(name + ":",
+                        name + " " + filename + "could not be uploaded."
+                        + " Status code: " + r.status_code)
+        print("Error: Upload was unsuccessful.")
+        print(r.status_code)
+        return False
+
+    return(pasteurl)
+
+
 ### TESTING
 
 def parse_config(config_path=None):

@@ -68,52 +68,6 @@ launcher_args['filter'] = filt
 launcher_args['bindings'] = bindings
 launcher_args['index'] = index
 
-
-# upload image and notify via notify-send
-def upload(filename):
-    from requests import Session, adapters, exceptions
-    """Upload image to ptpb.pw and notify via notify-send."""
-    filepath = os.path.join(SCREENSHOT_DIRECTORY, filename)
-    url = "https://ptpb.pw"
-    files = {'c': open(filepath, 'rb')}
-    values = {'p':'1', 'sunset':'432000'}
-
-    s = Session()
-    a = adapters.HTTPAdapter(max_retries=3)
-    s.mount('https://', a)
-    try:
-        rh = s.get(url)
-    except exceptions.RequestException as e:
-        print("Error: Failed to connect to " + url)
-        mbrofi.notify("Screenshot:", 
-                      "Screenshot " + filename + "could not be uploaded."
-                        + " Failed to connect to " + url)
-        return False
-
-    if not (rh.status_code == 200):
-        print("Error: Failed to connect to " + url)
-        print(rh.status_code)
-        mbrofi.notify("Screenshot:", 
-                      "Screenshot " + filename + "could not be uploaded."
-                        + " Failed to connect to " + url)
-        return False
-
-    r = s.post(url + "/?u=1", files = files, data = values)
-    if (r.status_code == 200):
-        pasteurl = r.text
-        mbrofi.notify("Screenshot:",
-                        "Screenshot " + filename + " uploaded to:"
-                        + " " + url)
-    else:
-        mbrofi.notify("Screenshot:",
-                        "Screenshot " + filename + "could not be uploaded."
-                        + " Status code: " + r.status_code)
-        print("Error: Upload was unsuccessful.")
-        print(r.status_code)
-        return False
-
-    return(pasteurl)
-
 def rename_screenshot(filename):
     """Rename screenshot."""
     filepath=os.path.join(SCREENSHOT_DIRECTORY, filename)
@@ -202,9 +156,10 @@ def main():
                             , prompt='screenshots help:', message=message)
         elif (exit == 11):
             print('uploading ' + sel)
-            pasteurl = upload(sel)
-            pasteurl = pasteurl.strip()
+            pasteurl = mbrofi.upload_ptpb(SCREENSHOT_DIRECTORY, sel
+                                        , notify_bool=True, name="Screenshot")
             if pasteurl:
+                pasteurl = pasteurl.strip()
                 mbrofi.clip(pasteurl)
             break
         elif (exit == 12):
