@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 #
 # Library of tools to create rofi interfaces in python
 
@@ -294,7 +295,7 @@ class FileRepo:
         self.__linebs['misc'] = 100
 
     # Scans the directory for files and populates the file list and linebs
-    def scan_files(self, recursive=True):
+    def scan_files(self, recursive=False):
         """Scans the directory for files and populates the files list and 
         linebs. It is not a particularly fast implementation.
 
@@ -404,6 +405,10 @@ class FileRepo:
         """
         plist = list(itemgetter(prop)(filen) for filen in self.__files)
         return(plist)
+
+    def path(self):
+        """return path"""
+        return(self.__path)
 
     def filenames(self):
         """Get filenames"""
@@ -549,5 +554,11 @@ def parse_config(config_path=None):
     return(config)
 
 if __name__ == "__main__":
-    parse_config()
+    #parse_config()
+    fr = FileRepo('/home/martin')
+    fr.scan_files(recursive=True)
+    print(fr.filenames())
+    print(fr.path())
+    print(fr.filecount())
+    
 #EOF

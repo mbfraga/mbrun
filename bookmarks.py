@@ -5,15 +5,20 @@ from helpers import mbrofi
 # user variables
 
 # application variables
+bindings = ["alt+h"]
+bindings += ["alt+o"]
+bindings += ["alt+p"]
 
 # launcher variables
-msg = "Search on amazon."
-prompt = "amazon:"
+msg = "Description of template. "
+msg += bindings[0] + " to show help."
+#msg = "Help text. " + bindings[0] + " does something, " +  \
+        #bindings[1]  + " does something else."
+prompt = "template:"
 answer=""
 sel=""
 filt=""
 index=0
-bindings=[]
 
 # run correct launcher with prompt and help message
 launcher_args = {}
@@ -25,20 +30,8 @@ launcher_args['index'] = index
 
 
 def list_entries():
-    """Return entries to be displayed in rofi."""
-    return([''])
-
-
-def amazon(query):
-    """Generate amazon search url from query"""
-    query.replace(" ", "+")
-    if query:
-        url="https://www.amazon.com/s?url=search-alias%3Daps&field-keywords=" \
-                + query
-        print("Opening url in browser: " + query)
-        mbrofi.xdg_open(url)
-    else:
-        print("Empty query.")
+    """Get list of entries to be displayed via rofi."""
+    return(['a', 'b', 'bb', 'c'])
 
 
 def main_rofi_function(launcher_args):
@@ -61,14 +54,26 @@ def main(launcher_args):
         launcher_args['index'] = index
         if (exit == 0):
             # This is the case where enter is pressed
-            amazon(filt)
+            print("Main function of the script.")
             break
         elif (exit == 1):
-            # This is the case where rofi is escaped (should EXIT)
+            # This is the case where rofi is escaped (should exit)
             break
+        elif (exit == 10):
+            helpmsg_list = []
+            helpmsg_list.append('help menu.')
+            helpmsg_list.append('binding one help string.')
+            helpmsg_list.append('binding two help string.')
+            mbrofi.rofi_help(bindings, helpmsg_list)
+        elif (exit == 11):
+            # What to do if second binding is pressed
+            print(bindings[1] + " was pressed!")
+        elif (exit == 12):
+            # What to do if second binding is pressed
+            print(bindings[2] + " was pressed!")
         else:
             break
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main(launcher_args)
