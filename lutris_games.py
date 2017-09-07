@@ -4,29 +4,29 @@ import os
 import sys
 from subprocess import Popen, PIPE
 from operator import itemgetter
+from distutils.spawn import find_executable
 
 from lutris import pga
 #from lutris.services.steam import (AppManifest, get_appmanifests,
 #get_steamapps_paths)
-import gi
-gi.require_version('Gdk', '3.0')
-gi.require_version('Gtk', '3.0')
-from lutris.game import Game
+
 from helpers import mbrofi
 
 
 # user variables
 
-BIND_INSTALL = 'alt-i'
+BIND_INSTALL = 'alt-u'
 BIND_STEAM = 'alt-s'
 STEAM_ONLY = False
+LUTRIS_EXE = 'lutris'
 script_id = 'lutris'
 mbconfig = mbrofi.parse_config()
 if script_id in mbconfig:
     lconf = mbconfig[script_id]
-    BIND_INSTALL = lconf.get("bind_install", fallback='alt-i')
+    BIND_INSTALL = lconf.get("bind_install", fallback='alt-u')
     BIND_STEAM = lconf.get("bind_steam", fallback='alt-s')
     STEAM_ONLY = lconf.getboolean("steam_only", fallback=False)
+    LUTRIS_EXE = lconf.get('lutris_exe', fallback='lutris')
 
 
 # application variables
@@ -36,8 +36,8 @@ bindings += [BIND_STEAM]
 
 # list of strings to use in the help menu for each binding.
 BIND_HELPLIST = ["Show help menu."]
-BIND_HELPLIST += ["Install game from submenu."]
-BIND_HELPLIST += ["Show only steam games"]
+BIND_HELPLIST += ["Show uninstalled games."]
+BIND_HELPLIST += ["Show only steam games."]
 
 # launcher variables
 msg = "Enter to game. alt-h for help."
@@ -56,6 +56,7 @@ launcher_args['bindings'] = bindings
 launcher_args['index'] = index
 
 def get_installed_games():
+    """Get a list of installed games via lutris. Each game is a dict."""
     games_list = pga.get_games()
     glist = []
     for game in games_list:
@@ -65,6 +66,7 @@ def get_installed_games():
 
 
 def get_uninstalled_games():
+    """Get a list of installed games via lutris. Each game is a dict."""
     games_list = pga.get_games()
     glist = []
     for game in games_list:
@@ -74,15 +76,42 @@ def get_uninstalled_games():
 
 
 def generate_entries(games_list):
-        display_list = []
-        name_plen = 40
-        for game in games_list:
-            game_name = game['name']
-            if len(game_name) > name_plen-2:
-                game_name = game_name[:name_plen-1] + '…'
+    """Generate entries for rofi based on a game list obtained via 
+    pga.get_games()
+    """
+    display_list = []
+    name_plen = 40
+    for game in games_list:
+        game_name = game['name']
+        if len(game_name) > name_plen-2:
+            game_name = game_name[:name_plen-1] + '…'
+        if game['runner']:
             dispname = game_name.ljust(name_plen) + game['runner']
-            display_list.append(dispname)
-        return(display_list)
+        else:
+            dispname = game_name.ljust(name_plen)
+        display_list.append(dispname)
+    return(display_list)
+
+
+def show_install_menu(return_key):
+    """Show a rofi menu with uninstalled games. Right now it doesn't isntall
+    them.
+    """
+    games_list = get_uninstalled_games()
+    display_list = generate_entries(games_list)
+    largs = {}
+    largs['prompt'] = "lutris (uninstalled):"
+    largs['mesg'] = "See uninstalled games (does not install them). Press '"
+    largs['mesg'] += return_key +  "' to go back."
+    largs['bindings'] = [return_key]
+    largs['format'] = 'i'
+    ans, exit = mbrofi.rofi(display_list, largs, ['-i'])
+    if (exit == 1):
+        sys.exit(1)
+    elif (exit == 10) or (not ans):
+        return(True)
+    else:
+        return(True)
 
 
 def main():
@@ -116,11 +145,13 @@ def main():
 
         if (exit == 0):
             selected_game = games_list[int(index)]
-            game_tr = Game(int(selected_game['id']))
-            game_tr.prelaunch()
-            game_tr.play()
-            print(game_tr)
-            print(game_tr.is_installed)
+            slug = selected_game['slug']
+            cmd = []
+            cmd.append(LUTRIS_EXE)
+            print(selected_game)
+            if slug != 'lutris':
+                cmd.append('lutris:rungame/' + slug)
+            Popen(cmd).communicate()
             break
         elif (exit == 1):
             # this is the case where rofi is escaped (should exit)
@@ -131,7 +162,7 @@ def main():
             mbrofi.rofi_help(launcher_args['bindings'], BIND_HELPLIST
                             , prompt='screenshots help:', message=message)
         elif (exit == 11):
-            break
+            show_install_menu(BIND_INSTALL)
         elif (exit == 12):
             steam_only=(not steam_only)
         else:
