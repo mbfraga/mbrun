@@ -166,7 +166,7 @@ def get_displays():
         if ' connected' in entry:
             d = entry.split()
             dlist.append(d[0].strip())
-            glist.append(d[3].strip())
+            glist.append(d[2].strip())
     return(dlist, glist)
 
 

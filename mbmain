@@ -131,8 +131,19 @@ if __name__ == "__main__":
             index, filt, sel, exit = main_function(displaynames)
             if (exit == 0):
                 # Run script selected
-                mbrofi.run_mbscript(os.path.join(enabled_path
+                if int(index) != -1:
+                    mbrofi.run_mbscript(os.path.join(enabled_path
                                                 , enabledfiles[int(index)]))
+                elif filt:
+                    filt_list = filt.split()
+                    script_name = filt_list[0]
+                    args = filt_list[1:]
+                    for efile in enabledfiles:
+                        if script_name in efile:
+                            script_path = os.path.join(enabled_path, efile)
+                            mbrofi.run_mbscript(script_path, args)
+                            break
+
                 break
             elif (exit == 1):
                 sys.exit(1)

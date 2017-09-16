@@ -1,6 +1,6 @@
 #!/bin/env python3
 
-import sys
+from sys import argv,exit
 from subprocess import Popen, PIPE
 from helpers import mbrofi
 
@@ -81,8 +81,9 @@ def main(launcher_args, query=None):
 
 
 if __name__ == '__main__':
-    if (len(sys.argv) > 1):
-        query = sys.argv[1]
+    if (len(argv) > 1):
+        query = ''.join(str(e) + ' ' for e in argv[1:]).strip()
+        main(launcher_args, query)
     else:
         query = None
         main(launcher_args, query)

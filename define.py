@@ -1,6 +1,6 @@
 #!/bin/env python3
 
-import sys
+from sys import argv,exit
 from subprocess import Popen, PIPE
 from helpers import mbrofi
 
@@ -9,11 +9,17 @@ from helpers import mbrofi
 # application variables
 mbconfig = mbrofi.parse_config()
 dictionary_file = 'dictd_www.dict.org_gcide'
+thesaurus_file = 'Moby Thesaurus II'
+BIND_TOGGLE = 'alt-t'
 rofi_lines = None
 script_ident = 'define'
 if script_ident in mbconfig:
     dictionary_file = mbconfig[script_ident].get("dictionary_file"
                                         , fallback='dictd_www.dict.org_gcide')
+
+    thesaurus_file = mbconfig[script_ident].get("thesaurus_file"
+                                        , fallback='Moby Thesaurus II')
+    BIND_TOGGLE = mbconfig[script_ident].get("bind_toggle", fallback="alt-t")
     rofi_lines = mbconfig[script_ident].get("rofi_lines", fallback=None)
 
 # launcher variables
@@ -25,15 +31,19 @@ launcher_args = {}
 launcher_args['prompt'] = prompt
 launcher_args['filter'] = filt
 launcher_args['format'] = 'f'
+launcher_args['bindings'] = [BIND_TOGGLE]
 
-def define(word):
+def define(word, thesaurus=False):
     """Send word to sdcv dictionary and return results"""
-    proc = Popen(['sdcv', '-n', '-u', dictionary_file, word], stdout=PIPE)
+    if thesaurus:
+        proc = Popen(['sdcv', '-n', '-u', thesaurus_file, word], stdout=PIPE)
+    else:
+        proc = Popen(['sdcv', '-n', '-u', dictionary_file, word], stdout=PIPE)
     ans = proc.stdout.read().decode('utf-8')
-    exit = proc.wait()
-    if exit == 1:
+    exit_code = proc.wait()
+    if exit_code == 1:
         print("sdcv failed...exiting")
-        sys.exit(1)
+        exit(1)
     else:
         entries = []
         templist = ans.strip().split('\n')
@@ -44,43 +54,51 @@ def define(word):
         return(entries)
 
 
-def main_rofi_function(launcher_args, query=None):
-    """Call main rofi function and return the selection, filter, selection
-    index, and exit code. Don't return any of these in case of rofi being 
-    escaped.
-    """
-    if query is None:
-        answer, exit = mbrofi.rofi([], launcher_args)
-    else:
-        if rofi_lines is None:
-            answer, exit = mbrofi.rofi(define(query), launcher_args)
-        else:
-            answer, exit = mbrofi.rofi(define(query), launcher_args
-                                   , ['-lines', str(rofi_lines), '-i'])
-    if exit == 1:
-        return(None, 1)
-    filt = answer.strip()
-    return(filt, exit)
-
-
-
-
-def main(launcher_args, query=None):
+def main(launcher_args, query=None, thesaurus=False):
     """Main function."""
     while True:
-        filt, exit = main_rofi_function(launcher_args, query)
-        if (exit == 0):
-            query = filt
-        elif (exit == 1):
-            # This is the case where rofi is escaped (should exit)
+        if thesaurus:
+            launcher_args['prompt'] = "thesaurus:"
+        else:
+            launcher_args['prompt'] = "define"
+        if query is None:
+                answer, exit_code = mbrofi.rofi([], launcher_args)
+        else:
+            if rofi_lines is None:
+                answer, exit_code = mbrofi.rofi(define(query, thesaurus)
+                                           , launcher_args, '-i')
+            else:
+                answer, exit_code = mbrofi.rofi(define(query, thesaurus)
+                                           , launcher_args
+                                           , ['-lines', str(rofi_lines), '-i'])
+        if (exit_code == 1):
             break
+        if not answer:
+            if exit_code == 10:
+                thesaurus = not(thesaurus)
+                continue
+            else:
+                break
+        elif (exit_code == 0):
+            filt = answer.strip()
+            query = filt
+        elif (exit_code == 10):
+            thesaurus = not(thesaurus)
+            filt = answer.strip()
+            query = filt
         else:
             break
 
 
 if __name__ == '__main__':
-    if (len(sys.argv) > 1):
-        query = sys.argv[1]
+    if (len(argv) > 1):
+        if argv[1] == '-t':
+            thesaurus = True
+            query = ''.join(str(e) + ' ' for e in argv[2:]).strip()
+        else:
+            thesaurus = False
+            query = ''.join(str(e) + ' ' for e in argv[1:]).strip()
+        main(launcher_args, query, thesaurus)
     else:
         query = None
         main(launcher_args, query)

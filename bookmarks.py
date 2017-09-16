@@ -1,20 +1,31 @@
 #!/bin/env python3
 
+import os
 from helpers import mbrofi
 
 # user variables
 
 # application variables
+bookmark_directory='~/bookmarks/'
+
+BIND_NEW = 'alt-n'
+script_id = 'bookmarks'
+mbconfig = mbrofi.parse_config()
+if script_id in mbconfig:
+    lconf = mbconfig[script_id]
+    bookmark_directory = lconf.get("bookmark_directory"
+                                        , fallback='~/bookmarks/')
+    BIND_NEW = lconf.get('bind_new', fallback='BIND_NEW')
+BOOKMARK_DIRECTORY = os.path.expanduser(bookmark_directory)
+
 bindings = ["alt+h"]
-bindings += ["alt+o"]
-bindings += ["alt+p"]
 
 # launcher variables
-msg = "Description of template. "
+msg = "Press Enter to open bookmark. "
 msg += bindings[0] + " to show help."
 #msg = "Help text. " + bindings[0] + " does something, " +  \
         #bindings[1]  + " does something else."
-prompt = "template:"
+prompt = "bookmarks:"
 answer=""
 sel=""
 filt=""
@@ -27,6 +38,53 @@ launcher_args['mesg'] = msg
 launcher_args['filter'] = filt
 launcher_args['bindings'] = bindings
 launcher_args['index'] = index
+
+
+def check_url():
+    pass
+
+
+def list_bookmarks():
+    pass
+
+
+def add_bookmark(name, url):
+
+    book_path = os.path.join(BOOKMARK_DIRECTORY, name)
+    print('name: ' + name)
+    print('url: ' + url)
+    print('path: ' + book_path)
+    if os.path.isfile(book_path):
+        print("Bookmark '" + book_path + "' was found...ignoring 'add'")
+        return(False)
+
+    bookfile = open(book_path, 'w')
+    bookfile.write(url.strip())
+    bookfile.close()
+
+
+def rm_bookmark():
+    pass
+
+
+def edit_bookmark():
+    pass
+
+
+def open_bookmark(name):
+    book_path = os.path.join(BOOKMARK_DIRECTORY, name)
+    print('name: ' + name)
+    print('path: ' + book_path)
+    if not os.path.isfile(book_path):
+        print("Bookmark '" + name + "' was not found...ignoring 'open'")
+        return(False)
+
+    bookfile = open(book_path, 'r')
+    url = bookfile.readline()
+    bookfile.close()
+    print('url: ' + url)
+    #mbrofi.xdg_open(
+
 
 
 def list_entries():
@@ -62,9 +120,7 @@ def main(launcher_args):
         elif (exit == 10):
             helpmsg_list = []
             helpmsg_list.append('help menu.')
-            helpmsg_list.append('binding one help string.')
-            helpmsg_list.append('binding two help string.')
-            mbrofi.rofi_help(bindings, helpmsg_list)
+            mbrofi.rofi_help(bindings, helpmsg_list, prompt='bookmarks help:')
         elif (exit == 11):
             # What to do if second binding is pressed
             print(bindings[1] + " was pressed!")
@@ -76,4 +132,15 @@ def main(launcher_args):
 
 
 if __name__ == '__main__':
-    main(launcher_args)
+    if not os.path.isdir(BOOKMARK_DIRECTORY):
+        print("Bookmark directory does not exist at '" + BOOKMARK_DIRECTORY
+                + "', creating it...")
+        os.makedirs(BOOKMARK_DIRECTORY)
+    #main(launcher_args)
+    print('add')
+    print('---')
+    add_bookmark('hello', 'world')
+    print()
+    print('open')
+    print('----')
+    open_bookmark('hello')

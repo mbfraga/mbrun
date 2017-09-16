@@ -1,5 +1,6 @@
 #!/bin/env python3
 
+from sys import argv
 from helpers import mbrofi
 
 # user variables
@@ -40,22 +41,14 @@ def youtube(query):
         print("Empty query.")
 
 
-def main_rofi_function(launcher_args):
-    """Call main rofi function and return the selection, filter, selection
-    index, and exit code. Don't return any of these in case of rofi being 
-    escaped.
-    """
-    answer, exit = mbrofi.rofi(list_entries(), launcher_args)
-    if exit == 1:
-        return(False, False, False, 1)
-    index, filt, sel = answer.strip().split(';')
-    return(index, filt, sel, exit)
-
-
 def main(launcher_args):
     """Main function."""
     while True:
-        index, filt, sel, exit = main_rofi_function(launcher_args)
+
+        answer, exit = mbrofi.rofi(list_entries(), launcher_args)
+        if exit == 1:
+            break
+        index, filt, sel = answer.strip().split(';')
         launcher_args['filter'] = filt
         launcher_args['index'] = index
         if (exit == 0):
@@ -70,4 +63,9 @@ def main(launcher_args):
 
 
 if __name__ == "__main__":
-    main(launcher_args)
+
+    if ( len(argv) > 1):
+        query = ''.join(str(e) + ' ' for e in argv[1:]).strip()
+        youtube(query)
+    else:
+        main(launcher_args)
