@@ -22,6 +22,9 @@ if script_ident in mbconfig:
     BIND_TOGGLE = mbconfig[script_ident].get("bind_toggle", fallback="alt-t")
     rofi_lines = mbconfig[script_ident].get("rofi_lines", fallback=None)
 
+if rofi_lines == "None":
+    rofi_lines = None
+
 # launcher variables
 prompt = "define:"
 filt=""
@@ -54,23 +57,33 @@ def define(word, thesaurus=False):
         return(entries)
 
 
-def main(launcher_args, query=None, thesaurus=False):
+def main(launcher_args, query=None, thesaurus=False, rofi_lines=None):
     """Main function."""
     while True:
         if thesaurus:
             launcher_args['prompt'] = "thesaurus:"
+            launcher_args['mesg'] = "Press '" + BIND_TOGGLE 
+            launcher_args['mesg'] += "' to show definition."
         else:
             launcher_args['prompt'] = "define"
+            launcher_args['mesg'] = "Press '" + BIND_TOGGLE 
+            launcher_args['mesg'] += "' to show thesaurus."
         if query is None:
                 answer, exit_code = mbrofi.rofi([], launcher_args)
         else:
             if rofi_lines is None:
+                theme_args = ["-theme-str", "#window {width: 32em;}"]
+                theme_args.append("-i")
                 answer, exit_code = mbrofi.rofi(define(query, thesaurus)
-                                           , launcher_args, '-i')
+                                           , launcher_args, theme_args)
             else:
+                theme_args = ["-theme-str"
+                              , "#window {width: 32em;}"
+                                + " #window.mainbox.listview { lines: "
+                                + rofi_lines + ";}"]
+                theme_args.append("-i")
                 answer, exit_code = mbrofi.rofi(define(query, thesaurus)
-                                           , launcher_args
-                                           , ['-lines', str(rofi_lines), '-i'])
+                                           , launcher_args, theme_args)
         if (exit_code == 1):
             break
         if not answer:
@@ -98,7 +111,7 @@ if __name__ == '__main__':
         else:
             thesaurus = False
             query = ''.join(str(e) + ' ' for e in argv[1:]).strip()
-        main(launcher_args, query, thesaurus)
+        main(launcher_args, query, thesaurus, rofi_lines=rofi_lines)
     else:
         query = None
-        main(launcher_args, query)
+        main(launcher_args, query, rofi_lines=rofi_lines)
