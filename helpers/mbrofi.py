@@ -5,18 +5,28 @@
 
 import os
 import sys
-from subprocess import Popen, PIPE, call
+from subprocess import Popen, PIPE
 import struct
 from stat import ST_CTIME, ST_ATIME, ST_MTIME, ST_SIZE
 from operator import itemgetter
+from datetime import datetime
 
 from configparser import ConfigParser
 
 __version__ = '0.0'
-__author__  = 'Martin B. Fraga <mbfraga@gmail.com>'
+__author__ = 'Martin B. Fraga <mbfraga@gmail.com>'
 
 
-def rofi(entries, launcher_arguments=False, additional_args=[]): 
+def sizeof_fmt(num, suffix='B'):
+    """Get bit number and return formatted size string"""
+    for unit in ['', 'Ki', 'Mi', 'Gi', 'Ti', 'Pi', 'Ei', 'Zi']:
+        if abs(num) < 1024.0:
+            return "%3.1f%s%s" % (num, unit, suffix)
+        num /= 1024.0
+    return "%.1f%s%s" % (num, 'Yi', suffix)
+
+
+def rofi(entries, launcher_arguments=False, additional_args=[]):
     """ Call rofi and return a tuple with rofi's stdout as a string separated
     by newlines, and the exit code of rofi as a string.
 
@@ -70,6 +80,7 @@ def rofi(entries, launcher_arguments=False, additional_args=[]):
         return(None, exit_code)
 
     return(answer, exit_code)
+
 
 def rofi_help(bindings, help_strings, help_binding='alt+h', sep="    ",
               prompt="help:", message=None):
@@ -141,7 +152,8 @@ def rofi_ask(question, prompt=None, abort_key=None):
     else:
         return(False)
 
-def rofi_enter(premise, prompt=None, options = [], dfilter=None, bindings=[]):
+
+def rofi_enter(premise, prompt=None, options=[], dfilter=None, bindings=[]):
     """Use rofi to request an entry from the user. Function returns a tuple
     with the selected entry, and the exit code.
 
@@ -155,7 +167,7 @@ def rofi_enter(premise, prompt=None, options = [], dfilter=None, bindings=[]):
     launcher_args = {}
     if prompt is not None:
         launcher_args['prompt'] = prompt
-    if dfilter is not None: 
+    if dfilter is not None:
         launcher_args['filter'] = dfilter
     launcher_args['bindings'] = ['alt-Return']
     launcher_args['bindings'].extend(bindings)
@@ -180,7 +192,7 @@ def rofi_enter(premise, prompt=None, options = [], dfilter=None, bindings=[]):
 
 def notify(title, message=None, duration=4000):
     """Send notification via notify-send.
-    
+
     Keyword arguments:
     title -- string for title of notification
     message -- string for message (default None)
@@ -213,6 +225,7 @@ def clip(clipstring, selection='both'):
         proc.stdin.close()
         proc.communicate()
 
+
 def get_clip(selection="clipboard"):
     """Get string from clipboard."""
     if selection == "clipboard":
@@ -227,6 +240,7 @@ def get_clip(selection="clipboard"):
         print("get_clip only accepts clipboard or primary arguments")
         sys.exit(1)
     return(ans)
+
 
 def xdg_open(application, wait=True):
     """Open application using xdg-open.
@@ -253,7 +267,6 @@ def run_mbscript(scriptpath, arguments=[]):
         sys.exit(1)
     proc = Popen([scriptpath] + arguments)
     proc.communicate()
-
 
 
 def get_mime_type(filepath):
@@ -296,11 +309,11 @@ class FileRepo:
 
     # Scans the directory for files and populates the file list and linebs
     def scan_files(self, recursive=False):
-        """Scans the directory for files and populates the files list and 
+        """Scans the directory for files and populates the files list and
         linebs. It is not a particularly fast implementation.
 
         Keyword arguments:
-        recursive -- define whether scan should be recursive or not 
+        recursive -- define whether scan should be recursive or not
                      (default True)
         """
         self.__filecount = 0
@@ -338,10 +351,10 @@ class FileRepo:
                     continue
                 if f.is_dir():
                     continue
-                #try:
-                #    stat = os.stat(fp)
-                #except:
-                #    continue
+                # try:
+                #     stat = os.stat(fp)
+                # except:
+                #     continue
 
                 file_props = {}
                 file_props['size'] = f.stat()[ST_SIZE]
@@ -394,13 +407,13 @@ class FileRepo:
         if sortby not in ['size', 'adate', 'mdate', 'cdate', 'name']:
             print("Key '" + sortby + "' is not valid.")
             print("Choose between size, adate, mdate, cdate or name.")
-        self.__files = sorted(self.__files, 
-                            key=itemgetter(sortby), reverse=not sortrev)
-        self.sorttype=sortby
-        self.sortrev=sortrev
+        self.__files = sorted(self.__files,
+                              key=itemgetter(sortby), reverse=not sortrev)
+        self.sorttype = sortby
+        self.sortrev = sortrev
 
     def get_property_list(self, prop='name'):
-        """Get a list a particular property pertaining to each file in 
+        """Get a list a particular property pertaining to each file in
         files list.
         """
         plist = list(itemgetter(prop)(filen) for filen in self.__files)
@@ -443,7 +456,7 @@ class FileRepo:
                     block = datetime.utcfromtimestamp(filen[formatn])
                     block = block.strftime('%d/%m/%Y %H:%M')
                 elif formatn == 'size':
-                    size=filen[formatn]
+                    size = filen[formatn]
                     block = sizeof_fmt(size)
                 else:
                     block = str(filen[formatn])
@@ -465,8 +478,8 @@ class FileRepo:
             print("No files added to file repo")
             return(1)
 
-        proc = Popen(['grep', '-i', '-I', filters_string] + self.filepaths() 
-                     , stdout=PIPE)
+        proc = Popen(['grep', '-i', '-I', filters_string] + self.filepaths(),
+                     stdout=PIPE)
         answer = proc.stdout.read().decode('utf-8')
         exit_code = proc.wait()
 
@@ -484,15 +497,16 @@ class FileRepo:
 
         return(grep_file_repo)
 
+
 def upload_ptpb(rootpath, filename, notify_bool=True, name="File"):
     """Upload file to ptpb.pw and notify via notify-send.
 
     Keyword arguments:
     rootpath -- root path for file.
     filename -- name of file.
-    notify_bool -- boolean on whether or not to send notification (default True)
+    notify_bool -- boolean to send notification (default True)
     name -- name used to generate nicer notifications (default File).
-        """
+    """
     from requests import Session, adapters, exceptions
 
     filepath = os.path.join(rootpath, filename)
@@ -501,7 +515,7 @@ def upload_ptpb(rootpath, filename, notify_bool=True, name="File"):
         return(False)
     url = "https://ptpb.pw"
     files = {'c': open(filepath, 'rb')}
-    opts = {'p':'1', 'sunset':'432000'}
+    opts = {'p': '1', 'sunset': '432000'}
 
     s = Session()
     a = adapters.HTTPAdapter(max_retries=3)
@@ -510,9 +524,9 @@ def upload_ptpb(rootpath, filename, notify_bool=True, name="File"):
         rh = s.get(url)
     except exceptions.RequestException as e:
         print("Error: Failed to connect to " + url)
-        notify( name + ":", 
-                      name + " '" + filename + "'could not be uploaded."
-                        + " Failed to connect to " + url)
+        notify(name + ":",
+               name + " '" + filename + "'could not be uploaded."
+               + " Failed to connect to " + url)
         return False
 
     if not (rh.status_code == 200):
@@ -523,7 +537,7 @@ def upload_ptpb(rootpath, filename, notify_bool=True, name="File"):
                         + " Failed to connect to " + url)
         return False
 
-    r = s.post(url + "/?u=1", files = files, data = opts)
+    r = s.post(url + "/?u=1", files=files, data=opts)
     if (r.status_code == 200):
         pasteurl = r.text
         if notify_bool:
@@ -532,16 +546,14 @@ def upload_ptpb(rootpath, filename, notify_bool=True, name="File"):
     else:
         if notify_bool:
             notify(name + ":",
-                        name + " " + filename + "could not be uploaded."
-                        + " Status code: " + r.status_code)
+                   name + " " + filename + "could not be uploaded."
+                   + " Status code: " + r.status_code)
         print("Error: Upload was unsuccessful.")
         print(r.status_code)
         return False
 
     return(pasteurl)
 
-
-### TESTING
 
 def parse_config(config_path=None):
     """Parse a configuration file, and return the ConfigParser class result"""
@@ -553,12 +565,13 @@ def parse_config(config_path=None):
 
     return(config)
 
+
 if __name__ == "__main__":
-    #parse_config()
+    # parse_config()
     fr = FileRepo('/home/martin')
     fr.scan_files(recursive=True)
     print(fr.filenames())
     print(fr.path())
     print(fr.filecount())
-    
-#EOF
+
+# EOF
