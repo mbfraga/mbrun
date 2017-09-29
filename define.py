@@ -1,6 +1,6 @@
 #!/bin/env python3
 
-from sys import argv,exit
+from sys import argv, exit
 from subprocess import Popen, PIPE
 from helpers import mbrofi
 
@@ -11,27 +11,32 @@ mbconfig = mbrofi.parse_config()
 dictionary_file = 'dictd_www.dict.org_gcide'
 thesaurus_file = 'Moby Thesaurus II'
 BIND_TOGGLE = 'alt-t'
+BIND_OPENWEB = 'alt-o'
 rofi_lines = None
 script_ident = 'define'
 if script_ident in mbconfig:
-    dictionary_file = mbconfig[script_ident].get("dictionary_file"
-                                        , fallback='dictd_www.dict.org_gcide')
-
-    thesaurus_file = mbconfig[script_ident].get("thesaurus_file"
-                                        , fallback='Moby Thesaurus II')
+    dictionary_file = mbconfig[script_ident].get("dictionary_file",
+                                        fallback='dictd_www.dict.org_gcide')
+    thesaurus_file = mbconfig[script_ident].get("thesaurus_file",
+                                                fallback='Moby Thesaurus II')
     BIND_TOGGLE = mbconfig[script_ident].get("bind_toggle", fallback="alt-t")
+    BIND_OPENWEB = mbconfig[script_ident].get("bind_openweb", fallback="alt-o")
     rofi_lines = mbconfig[script_ident].get("rofi_lines", fallback=None)
+
+if rofi_lines == "None":
+    rofi_lines = None
 
 # launcher variables
 prompt = "define:"
-filt=""
+filt = ""
 
 # run correct launcher with prompt and help message
 launcher_args = {}
 launcher_args['prompt'] = prompt
 launcher_args['filter'] = filt
 launcher_args['format'] = 'f'
-launcher_args['bindings'] = [BIND_TOGGLE]
+launcher_args['bindings'] = [BIND_TOGGLE, BIND_OPENWEB]
+
 
 def define(word, thesaurus=False):
     """Send word to sdcv dictionary and return results"""
@@ -54,29 +59,49 @@ def define(word, thesaurus=False):
         return(entries)
 
 
-def main(launcher_args, query=None, thesaurus=False):
+def main(launcher_args, query=None, thesaurus=False, rofi_lines=None):
     """Main function."""
     while True:
         if thesaurus:
             launcher_args['prompt'] = "thesaurus:"
+            launcher_args['mesg'] = "Press '" + BIND_TOGGLE
+            launcher_args['mesg'] += "' to show definition,"
+            launcher_args['mesg'] += " '" + BIND_OPENWEB + "' to open in web."
         else:
             launcher_args['prompt'] = "define"
+            launcher_args['mesg'] = "Press '" + BIND_TOGGLE
+            launcher_args['mesg'] += "' to show thesaurus,"
+            launcher_args['mesg'] += " '" + BIND_OPENWEB + "' to open in web."
         if query is None:
                 answer, exit_code = mbrofi.rofi([], launcher_args)
         else:
             if rofi_lines is None:
-                answer, exit_code = mbrofi.rofi(define(query, thesaurus)
-                                           , launcher_args, '-i')
+                theme_args = ["-theme-str", "#window {width: 32em;}"]
+                theme_args.append("-i")
+                answer, exit_code = mbrofi.rofi(define(query, thesaurus),
+                                                launcher_args, theme_args)
             else:
-                answer, exit_code = mbrofi.rofi(define(query, thesaurus)
-                                           , launcher_args
-                                           , ['-lines', str(rofi_lines), '-i'])
+                theme_args = ["-theme-str",
+                              "#window {width: 32em;}" +
+                              " #window.mainbox.listview { lines: " +
+                              rofi_lines + ";}"]
+                theme_args.append("-i")
+                answer, exit_code = mbrofi.rofi(define(query, thesaurus),
+                                                launcher_args, theme_args)
         if (exit_code == 1):
             break
         if not answer:
             if exit_code == 10:
                 thesaurus = not(thesaurus)
                 continue
+            if exit_code == 11:
+                if query:
+                    if thesaurus:
+                        squery="http://www.thesaurus.com/browse/" + query
+                    else:
+                        squery="http://www.dictionary.com/browse/" + query
+                    mbrofi.xdg_open(squery)
+                    break
             else:
                 break
         elif (exit_code == 0):
@@ -86,6 +111,16 @@ def main(launcher_args, query=None, thesaurus=False):
             thesaurus = not(thesaurus)
             filt = answer.strip()
             query = filt
+        elif (exit_code == 11):
+            filt = answer.strip()
+            if not filt:
+                continue
+            if thesaurus:
+                squery="http://www.thesaurus.com/browse/" + filt
+            else:
+                squery="http://www.dictionary.com/browse/" + filt
+            mbrofi.xdg_open(squery)
+            break
         else:
             break
 
@@ -98,7 +133,7 @@ if __name__ == '__main__':
         else:
             thesaurus = False
             query = ''.join(str(e) + ' ' for e in argv[1:]).strip()
-        main(launcher_args, query, thesaurus)
+        main(launcher_args, query, thesaurus, rofi_lines=rofi_lines)
     else:
         query = None
-        main(launcher_args, query)
+        main(launcher_args, query, rofi_lines=rofi_lines)

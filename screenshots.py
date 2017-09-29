@@ -68,6 +68,7 @@ launcher_args['filter'] = filt
 launcher_args['bindings'] = bindings
 launcher_args['index'] = index
 
+
 def rename_screenshot(filename):
     """Rename screenshot."""
     filepath=os.path.join(SCREENSHOT_DIRECTORY, filename)
@@ -129,7 +130,7 @@ def main():
             sortchar = "v"
         launcher_args['mesg'] =  msg + " sorted by: " + \
                                 sortby + "[" + sortchar + ']'
-        index, filter, sel, exit = main_rofi_function(SFR.filenames())
+        index, filt, sel, exit = main_rofi_function(SFR.filenames())
         print("index:", str(index))
         print("filter:", filt)
         print("selection:", sel)
