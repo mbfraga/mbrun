@@ -168,7 +168,8 @@ if __name__ == "__main__":
                     elaunchargs['format'] = 's'
                     additional = ['-multi-select', 
                                   '-kb-row-tab', '',
-                                  '-kb-accept-alt', 'Tab']
+                                  '-kb-accept-alt', 'Tab',
+                                  '-matching', 'fuzzy']
                     ans,exit = mbrofi.rofi(newlist, elaunchargs, additional)
                     if exit == 0:
                         ans = ans.strip()

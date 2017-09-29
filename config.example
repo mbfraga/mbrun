@@ -41,5 +41,5 @@ lutris_exe = lutris
 bookmark_directory = ~/bookmarks/
 bind_new = alt-n
 bind_del = alt-d
-bind_rename = alt-u
-bind_chgurl = alt-r
+bind_rename = alt-r
+bind_chgurl = alt-u

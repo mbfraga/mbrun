@@ -22,6 +22,7 @@ if script_ident in mbconfig:
     BIND_TOGGLE = mbconfig[script_ident].get("bind_toggle", fallback="alt-t")
     BIND_OPENWEB = mbconfig[script_ident].get("bind_openweb", fallback="alt-o")
     rofi_lines = mbconfig[script_ident].get("rofi_lines", fallback=None)
+    BROWSER = mbconfig['mbmain'].get('browser', fallback='firefox')
 
 if rofi_lines == "None":
     rofi_lines = None
@@ -100,7 +101,7 @@ def main(launcher_args, query=None, thesaurus=False, rofi_lines=None):
                         squery="http://www.thesaurus.com/browse/" + query
                     else:
                         squery="http://www.dictionary.com/browse/" + query
-                    mbrofi.xdg_open(squery)
+                    Popen([BROWSER, squery]).communicate()
                     break
             else:
                 break
@@ -119,7 +120,7 @@ def main(launcher_args, query=None, thesaurus=False, rofi_lines=None):
                 squery="http://www.thesaurus.com/browse/" + filt
             else:
                 squery="http://www.dictionary.com/browse/" + filt
-            mbrofi.xdg_open(squery)
+            Popen([BROWSER, squery]).communicate()
             break
         else:
             break

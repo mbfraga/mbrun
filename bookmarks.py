@@ -3,6 +3,7 @@
 import sys
 import os
 from helpers import mbrofi
+from subprocess import Popen
 
 # user variables
 
@@ -147,7 +148,7 @@ def open_bookmark(name):
     url = bookfile.readline()
     bookfile.close()
     print('url: ' + url)
-    mbrofi.xdg_open(url)
+    Popen([BROWSER, url]).communicate()
     return(True)
 
 
