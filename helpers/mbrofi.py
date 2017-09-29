@@ -515,11 +515,7 @@ def upload_ptpb(rootpath, filename, notify_bool=True, name="File"):
         return(False)
     url = "https://ptpb.pw"
     files = {'c': open(filepath, 'rb')}
-<<<<<<< HEAD
     opts = {'sunset':'432000'}
-=======
-    opts = {'p': '1', 'sunset': '432000'}
->>>>>>> 761ab09e18d3413d247eadb7569f28580c546450
 
     s = Session()
     a = adapters.HTTPAdapter(max_retries=3)

@@ -2,12 +2,15 @@
 show_mesg = False
 bind_enable = alt-e
 bind_disable = alt-d
+browser = firefox
 
 [define]
 dictionary_file = dictd_www.dict.org_gcide
 thesaurus_file = Moby Thesaurus II
 rofi_lines = 25
 bind_toggle = alt-t
+bind_openweb = alt-o
+rofi_lines = None
 
 [screenshots]
 screenshot_directory = ~/Pictures/screenshots/
@@ -33,3 +36,10 @@ bind_install = alt-u
 bind_steam = alt-s
 steam_only = False
 lutris_exe = lutris
+
+[bookmarks]
+bookmark_directory = ~/bookmarks/
+bind_new = alt-n
+bind_del = alt-d
+bind_rename = alt-u
+bind_chgurl = alt-r
