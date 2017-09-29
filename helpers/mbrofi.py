@@ -501,7 +501,7 @@ def upload_ptpb(rootpath, filename, notify_bool=True, name="File"):
         return(False)
     url = "https://ptpb.pw"
     files = {'c': open(filepath, 'rb')}
-    opts = {'p':'1', 'sunset':'432000'}
+    opts = {'sunset':'432000'}
 
     s = Session()
     a = adapters.HTTPAdapter(max_retries=3)
@@ -525,10 +525,10 @@ def upload_ptpb(rootpath, filename, notify_bool=True, name="File"):
 
     r = s.post(url + "/?u=1", files = files, data = opts)
     if (r.status_code == 200):
-        pasteurl = r.text
+        pasteurl = r.headers['Location']
         if notify_bool:
             notify(name + ":", name + " " + filename + " uploaded to:"
-                        + " " + url)
+                        + " " + pasteurl)
     else:
         if notify_bool:
             notify(name + ":",
