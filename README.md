@@ -18,18 +18,51 @@ inspiration from any of these scripts for your own personal needs.
 ## list of scripts
 * template.py -- does nothing. Only serves as a template to build new scripts.
 * amazon.py -- do an amazon search
-* google.py -- do a google search
-* youtube.py -- do a youtube search
+* bookmarks.py -- file-based bookmark manager
 * define.py -- define word using sdcv dictionary application
-* thesaurus.py -- find synonyms for words using sdcv dictionary application
-* screenshots.py -- manage screenshot directory. preview/rename/upload screenshots. Uploads to ptpb.pw for now.
+* google.py -- do a google search
+* lutris.py -- launch games via lutris
+* network.py -- manage network (mostly wifi) via NetworkManager (WIP)
+* screenshots.py -- manage screenshot directory. preview/rename/upload 
+                    screenshots. Uploads to ptpb.pw for now.
 * sshot.py -- take screenshots of specific monitors, whole screen, a
-                        selected window, or a custom selection. Upload/delay
-                        supported. Uploads to ptpb.pw for now, and uses
-                        screenshots.py for interactive mode.
-* buku.py [pending]-- serves as a simple rofi interface for buku bookmark
-                      manager.
+              selected window, or a custom selection. Upload/delay
+              supported. Uploads to ptpb.pw for now, and uses
+              screenshots.py for interactive mode.
+* youtube.py -- do a youtube search.
+* buku.py [deprecated implementation, need to update] -- serves as a simple 
+                                                         rofi interface for
+                                                         buku bookmark
+                                                         manager.
 
+## Ideas
+
+### Scripts
+
+* dotfiles.py -- quickly open or go to specific dotfiles.
+* gitland.py -- quickly open git repos in gitland (maybe check their status.)
+* record.py -- like sshot but for screen recordings.
+* qn.py -- add a qn launcher.
+* quotes.py -- manage quotes/poems (a bit redundant perhaps)
+* convert.py -- convert units.
+* calculator.py -- simple calculator with history.
+* music.py -- manage music via mpd.
+* downloads.py -- manage the downloads directory...help keep it clean.
+* ptpb.py -- manage sending things to ptpb.pw
+
+### Features
+
+* fzf interface -- create a library that can open scripts in rofi or fzf. Will
+    require redoing most scripts...and probably adding a hotkey manager for
+    rofi and fzf (can use the one in [qn](https://github.com/mbfraga/qn))
+
+* cli interfaces for all scripts -- some already have rudimentary functionality
+    here.
+
+* Need to figure out best way to lay out the scripts, Ideally they would be
+    included in PATH and allow CLI control.
+
+* Add ability for scripts to keep/show entry histories
 
 ## layout
 
@@ -78,12 +111,15 @@ dependencies for each script.
    - sdcv
    - You can define your favorite dictionary file, but make sure you have one,
        otherwise sdcv doesn't do anything. Default: dictd_www.dict.org_gcide
+   - You can define your favorite thesaurus file, but make sure you have one,
+       otherwise the thesaurus functionality doesn't do anything. 
+       Default: Moby Thesaurus II 
 
-* thesaurus.py
-   - sdcv
-   - You can define your favorite dictionary file, but make sure you have one,
-       otherwise sdcv doesn't do anything. Default: Moby Thesaurus II 
+* lutris.py
+   - lutris
 
+* network.py
+   - libnm
 
 ## installation
 
