@@ -10,7 +10,6 @@ thesaurus_file = Moby Thesaurus II
 rofi_lines = 25
 bind_toggle = alt-t
 bind_openweb = alt-o
-rofi_lines = None
 
 [screenshots]
 screenshot_directory = ~/Pictures/screenshots/
