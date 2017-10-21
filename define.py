@@ -18,7 +18,7 @@ if script_ident in mbconfig:
     dictionary_file = mbconfig[script_ident].get("dictionary_file",
                                         fallback='dictd_www.dict.org_gcide')
     thesaurus_file = mbconfig[script_ident].get("thesaurus_file",
-                                                fallback='Moby Thesaurus II')
+                                        fallback='Moby Thesaurus II')
     BIND_TOGGLE = mbconfig[script_ident].get("bind_toggle", fallback="alt-t")
     BIND_OPENWEB = mbconfig[script_ident].get("bind_openweb", fallback="alt-o")
     rofi_lines = mbconfig[script_ident].get("rofi_lines", fallback=None)
@@ -77,13 +77,13 @@ def main(launcher_args, query=None, thesaurus=False, rofi_lines=None):
                 answer, exit_code = mbrofi.rofi([], launcher_args)
         else:
             if rofi_lines is None:
-                theme_args = ["-theme-str", "#window {width: 32em;}"]
+                theme_args = ["-theme-str", "#window {width: 38em;}"]
                 theme_args.append("-i")
                 answer, exit_code = mbrofi.rofi(define(query, thesaurus),
                                                 launcher_args, theme_args)
             else:
                 theme_args = ["-theme-str",
-                              "#window {width: 32em;}" +
+                              "#window {width: 38em;}" +
                               " #window.mainbox.listview { lines: " +
                               rofi_lines + ";}"]
                 theme_args.append("-i")
