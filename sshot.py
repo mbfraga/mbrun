@@ -106,6 +106,8 @@ def sshot(opt_name, opt_type, opt_geom, delay=0):
     elif opt_type == "selection":
         command.extend(MAIM_SELECTION_SETTINGS)
         command.append('-s')
+        if (delay == 0):
+            command.append('-u')
     elif opt_type == "display":
         command.extend(['-g', opt_geom])
 
