@@ -4,6 +4,7 @@ import os
 import sys
 from subprocess import Popen, PIPE
 from datetime import datetime, date, time
+from argparse import ArgumentParser
 
 from helpers import mbrofi
 import screenshots
@@ -85,7 +86,7 @@ launcher_args['filter'] = filt
 launcher_args['bindings'] = bindings
 launcher_args['index'] = index
 
-def sshot(opt_name, opt_type, opt_geom, delay=0):
+def sshot(opt_name, opt_type, opt_geom, delay=0, label=None):
     """Take screenshot and return the image name.
 
     Keyword arguments:
@@ -93,9 +94,13 @@ def sshot(opt_name, opt_type, opt_geom, delay=0):
     opt_type -- type of option (selection, all, display) 
     opt_geom -- geometry of option (only useful for displays
     delay -- int with delay in seconds (default 0)
+    label -- label screenshot, append after imgname (default None)
     """
     date = datetime.now()
-    imgname = "sshot-" + date.strftime('%Y-%m-%d_%H:%M:%S') + ".png"
+    imgname = "sshot-" + date.strftime('%Y-%m-%d_%H:%M:%S') 
+    if label:
+        imgname += '-' + label.replace(' ', '_')
+    imgname += ".png"
     imgloc = os.path.join(SCREENSHOT_DIRECTORY, imgname)
     command = ['maim']
     if (delay > 0):
@@ -103,7 +108,7 @@ def sshot(opt_name, opt_type, opt_geom, delay=0):
 
     if opt_type == "all":
         pass
-    elif opt_type == "selection":
+    elif opt_type == "selection" or opt_type == "sel":
         command.extend(MAIM_SELECTION_SETTINGS)
         command.append('-s')
         if (delay == 0):
@@ -167,8 +172,9 @@ def get_displays():
     for entry in ans.strip().split('\n'):
         if ' connected' in entry:
             d = entry.split()
-            dlist.append(d[0].strip())
-            glist.append(d[2].strip())
+            if '+' in d[2]:
+                dlist.append(d[0].strip())
+                glist.append(d[2].strip())
     return(dlist, glist)
 
 
@@ -196,14 +202,6 @@ def add_delay(delay_binding):
             return(None)
     else:
         return(None)
-
-
-def main_rofi_function(launcher_args, entries, delay):
-    """Call main rofi function and return the selection, filter, selection
-    index, and exit code. Don't return any of these in case of rofi being 
-    escaped.
-    """
-    return(index, filt, sel, exit)
 
 
 def main(launcher_args, upload):
@@ -262,4 +260,94 @@ def main(launcher_args, upload):
 if __name__ == '__main__':
     if (len(sys.argv) == 1):
         main(launcher_args, upload)
+    else:
+        parser = ArgumentParser(description='take screenshot and upload to' +
+                                              ' ptpb.pw. If no arguments are' +
+                                              ' included, rofi interface is' +
+                                              ' started.')
+        parser.add_argument('command', metavar='COMMAND', type=str, nargs='*',
+                            help='command to run (all, selection,' +
+                                 '<display-name>, <display-number>')
+        parser.add_argument('-u', '--upload', action='store_true',
+                            help='upload screenshot to ptpb.pw')
+        parser.add_argument('-d', '--delay', type=int, nargs=1, default=[0],
+                            help='set delay for screenshot')
+        parser.add_argument('-l', '--label', type=str, nargs=1,
+                            help='set label for screenshot')
+        parser.add_argument('--list', action='store_true',
+                            default=False, help='list command options')
+        parser.add_argument('-n', '--notify', action='store_true',
+                            default=False, help='notify via notify-send')
+
+
+        args = parser.parse_args()
+        if args.list:
+            opts = get_options()
+            for n in range(len(opts[0])):
+                print(opts[0][n])
+        if args.label:
+            label = args.label[0]
+        else:
+            label = None
+        delay = args.delay[0]
+        print(args)
+        print('upload: ' + str(upload))
+        print('delay: ' + str(delay))
+        print('label: ' + str(label))
+        print('command: ' + str(args.command))
+
+        if args.command:
+            command = args.command[0]
+            if command in ['sel', 'selection', 'all']:
+                print('taking screenshot of ' + command + "...")
+                imgname = sshot(command, command, command, delay=delay,
+                                label=label)
+            else:
+                displays = get_displays()
+                print(displays)
+                if command in displays[0]:
+                    for n in range(len(displays[0])):
+                        if command == displays[0][n]:
+                            disp = displays[0][n]
+                            geom = displays[1][n]
+                            print('taking screenshot of ' + disp + "...")
+                            imgname = sshot(disp, 'diplay', geom, delay=delay,
+                                            label=label)
+                elif command.isdigit():
+                    try:
+                        disp = displays[0][int(command)]
+                        geom = displays[1][int(command)]
+                        print('taking screenshot of ' + disp + "...")
+                        imgname = sshot(disp, 'diplay', geom, delay=delay,
+                                        label=label)
+                    except IndexError:
+                        print("Display number " + command + " not found.")
+                        print("Use one of the following: ")
+                        for n in range(len(displays[0])):
+                            print("   " + str(n) + ": " + displays[0][n] +
+                                  " " + displays[1][n])
+                        sys.exit(1)
+                else:
+                    print("Display '" + command + "' not found.")
+                    print("Use one of the following: ")
+                    for n in range(len(displays[0])):
+                        print("   " + str(n) + ": " + displays[0][n] +
+                                " " + displays[1][n])
+                    sys.exit(1)
+
+
+            if args.upload and imgname:
+                print('uploading...')
+                pasteurl = mbrofi.upload_ptpb(SCREENSHOT_DIRECTORY, imgname
+                                        , notify_bool=True, name="Screenshot")
+                if pasteurl:
+                    pasteurl = pasteurl.strip()
+                    mbrofi.clip(pasteurl)
+
+            if args.notify:
+                mbrofi.notify('sshot.py', 'Screenshot taken.')
+
+        else:
+            print('no command')
+
 
