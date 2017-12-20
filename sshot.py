@@ -172,6 +172,8 @@ def get_displays():
     for entry in ans.strip().split('\n'):
         if ' connected' in entry:
             d = entry.split()
+            if d[2] == 'primary':
+                d.pop(2)
             if '+' in d[2]:
                 dlist.append(d[0].strip())
                 glist.append(d[2].strip())
@@ -285,6 +287,7 @@ if __name__ == '__main__':
             opts = get_options()
             for n in range(len(opts[0])):
                 print(opts[0][n])
+            sys.exit(0)
         if args.label:
             label = args.label[0]
         else:

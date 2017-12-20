@@ -79,6 +79,7 @@ def main(launcher_args, query=None, thesaurus=False, rofi_lines=None):
             if rofi_lines is None:
                 theme_args = ["-theme-str", "#window {width: 38em;}"]
                 theme_args.append("-i")
+                theme_args.append("-markup-rows")
                 answer, exit_code = mbrofi.rofi(define(query, thesaurus),
                                                 launcher_args, theme_args)
             else:
@@ -87,6 +88,7 @@ def main(launcher_args, query=None, thesaurus=False, rofi_lines=None):
                               " #window.mainbox.listview { lines: " +
                               rofi_lines + ";}"]
                 theme_args.append("-i")
+                theme_args.append("-markup-rows")
                 answer, exit_code = mbrofi.rofi(define(query, thesaurus),
                                                 launcher_args, theme_args)
         if (exit_code == 1):
