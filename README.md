@@ -30,10 +30,7 @@ inspiration from any of these scripts for your own personal needs.
               supported. Uploads to ptpb.pw for now, and uses
               screenshots.py for interactive mode.
 * youtube.py -- do a youtube search.
-* buku.py [deprecated implementation, need to update] -- serves as a simple 
-                                                         rofi interface for
-                                                         buku bookmark
-                                                         manager.
+* mount.py -- show mountable drives (mount, unmount, open)
 
 ## Ideas
 
@@ -102,11 +99,6 @@ dependencies for each script.
 * screenshots.py
    - python-requests
 
-* buku.py (I don't like the use of sqlite on this one, will personally try to
-    move to plain text files for bookmark management)
-
-    - [buku](https://github.com/jarun/Buku)
-
 * define.py
    - sdcv
    - You can define your favorite dictionary file, but make sure you have one,
@@ -120,6 +112,9 @@ dependencies for each script.
 
 * network.py
    - libnm
+
+* mount.py
+   - udisks2
 
 ## installation
 

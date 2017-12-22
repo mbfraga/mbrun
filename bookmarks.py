@@ -20,10 +20,10 @@ if script_id in mbconfig:
     lconf = mbconfig[script_id]
     bookmark_directory = lconf.get("bookmark_directory",
                                    fallback='~/bookmarks/')
-    BIND_NEW = lconf.get('bind_new', fallback='BIND_NEW')
-    BIND_DEL = lconf.get('bind_del', fallback='BIND_DEL')
-    BIND_CHGURL = lconf.get('bind_chgurl', fallback='BIND_CHGURL')
-    BIND_RENAME = lconf.get('bind_rename', fallback='BIND_RENAME')
+    BIND_NEW = lconf.get('bind_new', fallback=BIND_NEW)
+    BIND_DEL = lconf.get('bind_del', fallback=BIND_DEL)
+    BIND_CHGURL = lconf.get('bind_chgurl', fallback=BIND_CHGURL)
+    BIND_RENAME = lconf.get('bind_rename', fallback=BIND_RENAME)
 
 BOOKMARK_DIRECTORY = os.path.expanduser(bookmark_directory)
 

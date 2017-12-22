@@ -255,6 +255,21 @@ def xdg_open(application, wait=True):
         proc.communicate()
 
 
+def terminal_open(command, title=None):
+    terminal = os.environ['TERMINAL']
+    if not terminal:
+        terminal = urxvt
+    generated_command = terminal
+    if title is not None:
+        if terminal in ['urxvt', 'xterm', 'gnome-terminal']:
+            generated_command += ' -title "' + title + '"'
+        elif terminal in ['termite', 'xfce-terminal']:
+            generated_command += ' --title "' + title + '"'
+        else:
+            generated_command = ' -T "' + title + '"'
+    os.system(generated_command + " -e " + command)
+
+
 def run_mbscript(scriptpath, arguments=[]):
     """Run a particular mbscript (for now it must be python).
 
