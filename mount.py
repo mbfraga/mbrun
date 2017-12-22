@@ -15,25 +15,28 @@ from helpers import mbrofi
 # application variables
 BIND_MOUNT = 'alt-m'
 BIND_UNMOUNT = 'alt-u'
-#BIND_ALL = 'alt-a'
+BIND_REFRESH = 'alt-r'
 BIND_OPEN = 'alt-o'
 script_id = 'mount'
 mbconfig = mbrofi.parse_config()
 OPEN_CMD = mbconfig['mbmain'].get('file_manager', fallback='nautilus')
 if script_id in mbconfig:
     lconf = mbconfig[script_id]
-    BIND_MOUNT = lconf.get('bind_unmount', fallback=BIND_MOUNT)
-    BIND_UNMOUNT = lconf.get('bind_mount', fallback=BIND_UNMOUNT)
+    BIND_MOUNT = lconf.get('bind_mount', fallback=BIND_MOUNT)
+    BIND_UNMOUNT = lconf.get('bind_unmount', fallback=BIND_UNMOUNT)
+    BIND_REFRESH = lconf.get('bind_refresh', fallback=BIND_REFRESH)
     BIND_OPEN = lconf.get('bind_open', fallback=BIND_OPEN)
 
 bindings = ["alt+h"]
 bindings += [BIND_MOUNT]
 bindings += [BIND_UNMOUNT]
+bindings += [BIND_REFRESH]
 bindings += [BIND_OPEN]
 
 BIND_HELPLIST = ["Show help menu."]
 BIND_HELPLIST += ["Mount device."]
 BIND_HELPLIST += ["Unmount device."]
+BIND_HELPLIST += ["Refresh devices."]
 BIND_HELPLIST += ["Open (mount if necessary) device."]
 
 # launcher variables
@@ -84,14 +87,17 @@ def get_unmounted(devices):
 def get_all(devices):
     alld = []
     lines = []
+    n = 0
     for dev in devices.values():
         alld.append(dev)
-        line = ''
+        line = str(n).zfill(2) + ": "
+        line += dev.label.ljust(10)
+        line += '| '
         line += dev.devname.ljust(10)
-        line += '| ' + dev.label.ljust(10)
         if dev.mounted:
             line += ' (mounted)'
         lines.append(line)
+        n += 1
     return(lines, alld)
 
 
@@ -298,6 +304,8 @@ def main(launcher_args):
                     mbrofi.rofi_warn("Failed to mount " + dev.devname)
                     break
         elif (exit == 13):
+            continue
+        elif (exit == 14):
             if (index != -1):
                 dev = entries[1][index]
                 if not dev.mounted:

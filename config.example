@@ -47,4 +47,5 @@ bind_chgurl = alt-u
 [mount]
 bind_mount = alt-m
 bind_unmount = alt-u
+bind_refresh = alt-r
 bind_open = alt-o
