@@ -11,18 +11,27 @@ from subprocess import Popen, PIPE
 from helpers import mbrofi
 
 # user variables
-#BIND_update = 'alt-u'
-#BIND_UPLOAD = 'alt-u'
-#mbconfig = mbrofi.parse_config()
-#if script_id in mbconfig:
-#    BIND_DELAY = lconf.get("bind_delay", fallback='alt-d')
+BIND_REFRESH = 'alt-r'
+BIND_CONNECT = 'alt-c'
 
+script_id = 'network'
+mbconfig = mbrofi.parse_config()
+if script_id in mbconfig:
+    BIND_REFRESH = lconf.get('bind_refresh', fallback=BIND_REFRESH)
+    BIND_CONNECT = lconf.get('bind_connect', fallback=BIND_CONNECT)
+
+bindings = ["alt+h"]
+bindings += [BIND_REFRESH]
+bindings += [BIND_CONNECT]
 
 # application variables
 CLIENT = NM.Client.new(None)
 LOOP = GLib.MainLoop()
 CONNS = CLIENT.get_connections()
 
+BIND_HELPLIST = ["Show help menu."]
+BIND_HELPLIST += ["Refresh networks."]
+BIND_HELPLIST += ["Connect to network."]
 
 # launcher variables
 msg = "Manage network."
@@ -31,7 +40,7 @@ answer=""
 sel=""
 filt=""
 index=0
-bindings=[]
+bindings=bindings
 
 # run correct launcher with prompt and help message
 launcher_args = {}
@@ -170,28 +179,29 @@ def choose_adapter(client):
 
 def main(launcher_args):
     """Main function."""
-    active = CLIENT.get_active_connections()
-    adapter = choose_adapter(CLIENT)
-    max_name_l = 20
-    max_sec_l = 15
-    max_str_l = 3
-    if adapter:
-        aps, active_ap, active_ap_con = create_ap_list(adapter, active)
-        apname_list = []
-        for ap in aps:
-            bars = str(ap.get_strength()).rjust(3)
-            is_active = ap.get_bssid() == active_ap.get_bssid()
-            line = ""
-            line += ssid_to_utf8(ap)[:max_name_l].ljust(max_name_l)
-            line += " | " + bars[:max_str_l].ljust(max_str_l)
-            line += " | " + ap_security(ap)[:max_sec_l].ljust(max_sec_l)
-            if is_active:
-                line += "|(active)"
-            apname_list.append(line)
-    else:
-        apname_list = []
-
     while True:
+        active = CLIENT.get_active_connections()
+        adapter = choose_adapter(CLIENT)
+        max_name_l = 20
+        max_sec_l = 15
+        max_str_l = 3
+        if adapter:
+            aps, active_ap, active_ap_con = create_ap_list(adapter, active)
+            apname_list = []
+            for ap in aps:
+                bars = str(ap.get_strength()).rjust(3)
+                is_active = ap.get_bssid() == active_ap.get_bssid()
+                line = ""
+                line += ssid_to_utf8(ap)[:max_name_l].ljust(max_name_l)
+                line += " | " + bars[:max_str_l].ljust(max_str_l)
+                line += " | " + ap_security(ap)[:max_sec_l].ljust(max_sec_l)
+                line += " | "
+                if is_active:
+                    line += "(active)"
+                apname_list.append(line)
+        else:
+            apname_list = []
+
         answer, exit = mbrofi.rofi(apname_list, launcher_args)
         if exit == 1:
             break
@@ -202,6 +212,11 @@ def main(launcher_args):
 
         if (exit == 0):
             print(ssid_to_utf8(aps[int(index)]))
+        elif (exit == 10):
+            helpmsg_list = BIND_HELPLIST
+            mbrofi.rofi_help(bindings, helpmsg_list, prompt='network help:')
+        elif (exit == 11):
+            continue
         else:
             break
 

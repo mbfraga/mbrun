@@ -45,7 +45,9 @@ bind_rename = alt-r
 bind_chgurl = alt-u
 
 [mount]
+ignore_devices = sda,/dev/mapper
 bind_mount = alt-m
 bind_unmount = alt-u
 bind_refresh = alt-r
 bind_open = alt-o
+bind_eject = alt-e

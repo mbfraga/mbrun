@@ -13,10 +13,12 @@ from helpers import mbrofi
 # user variables
 
 # application variables
+IGNORE_DEVICES=['sda', 'mapper/root']
 BIND_MOUNT = 'alt-m'
 BIND_UNMOUNT = 'alt-u'
 BIND_REFRESH = 'alt-r'
 BIND_OPEN = 'alt-o'
+BIND_EJECT = 'alt-e'
 script_id = 'mount'
 mbconfig = mbrofi.parse_config()
 OPEN_CMD = mbconfig['mbmain'].get('file_manager', fallback='nautilus')
@@ -26,18 +28,30 @@ if script_id in mbconfig:
     BIND_UNMOUNT = lconf.get('bind_unmount', fallback=BIND_UNMOUNT)
     BIND_REFRESH = lconf.get('bind_refresh', fallback=BIND_REFRESH)
     BIND_OPEN = lconf.get('bind_open', fallback=BIND_OPEN)
+    BIND_EJECT = lconf.get('bind_eject', fallback=BIND_EJECT)
+    IGNORE_DEVICES = lconf.get('ignore_devices', fallback=IGNORE_DEVICES)
+
+print(IGNORE_DEVICES)
+try:
+    assert isinstance(IGNORE_DEVICES, str)
+    IGNORE_DEVICES = IGNORE_DEVICES.split(',')
+except AssertionError:
+    pass
+print(IGNORE_DEVICES)
 
 bindings = ["alt+h"]
 bindings += [BIND_MOUNT]
 bindings += [BIND_UNMOUNT]
 bindings += [BIND_REFRESH]
 bindings += [BIND_OPEN]
+bindings += [BIND_EJECT]
 
 BIND_HELPLIST = ["Show help menu."]
 BIND_HELPLIST += ["Mount device."]
 BIND_HELPLIST += ["Unmount device."]
 BIND_HELPLIST += ["Refresh devices."]
 BIND_HELPLIST += ["Open (mount if necessary) device."]
+BIND_HELPLIST += ["Eject device."]
 
 # launcher variables
 msg = "Mount or unmount devices. "
@@ -58,6 +72,11 @@ mount_launcher_args['filter'] = filt
 mount_launcher_args['bindings'] = bindings
 mount_launcher_args['index'] = index
 
+def is_ignored(devname):
+    for igdev in IGNORE_DEVICES:
+        if igdev in devname:
+            return(True)
+    return(False)
 
 def get_mounted(devices):
     mounted = []
@@ -215,6 +234,20 @@ class device():
         command += " " + self.mountpath
         system(command)
 
+    def eject(self):
+        if self.mounted:
+            ok, err = self.unmount()
+            if not (ok):
+                return(ok, err)
+        command = ['udisksctl', 'power-off', '--block-device', self.devname]
+        proc=Popen(command)
+        out, err = proc.communicate()
+        exit_code = proc.returncode
+        if exit_code == 0:
+            return(True, "")
+        else:
+            return(False, err.decode('UTF-8'))
+
 
 def get_devices(showr=True, showi=False, showo=True, only_mountable=True):
     process = Popen(['lsblk', '-plno', 'NAME'], stdout=PIPE)
@@ -226,7 +259,9 @@ def get_devices(showr=True, showi=False, showo=True, only_mountable=True):
     devices = {}
     for devname in all_dev_l:
         dev = device(devname)
-        if dev.fstype is None and only_mountable:
+        if (dev.fstype is None or dev.label is None) and only_mountable:
+            continue
+        if is_ignored(dev.devname):
             continue
         if dev.type == 'part' or dev.type == 'crypt':
             if dev.removable and showr:
@@ -247,10 +282,9 @@ def get_devices(showr=True, showi=False, showo=True, only_mountable=True):
     return(devices)
 
 
-def main(launcher_args):
+def main(launcher_args, igdev=[]):
     while True:
-        devs = get_devices()
-        launcher_args['prompt'] = 'mount'
+        devs = get_devices(showi=True)
         entries = get_all(devs)
         answer, exit = mbrofi.rofi(entries[0], launcher_args)
         if exit == 1:
@@ -318,16 +352,22 @@ def main(launcher_args):
                 dev.get_mountpath()
                 dev.open()
                 break
+        elif (exit == 15):
+            if (index != -1):
+                dev = entries[1][index]
+                print("ejecting " + dev.devname + "...")
+                ok, err = dev.eject()
+                if (ok):
+                    print("success!")
+                else:
+                    mbrofi.rofi_warn("Failed to eject " + dev.devname +
+                                     "\n" + err)
+                    break
         else:
             break
 
 
 if __name__ == '__main__':
-    #print(get_devices(showr=True, only_mountable=False))
+    #print(get_devices(showi=True, only_mountable=True))
     main(mount_launcher_args)
     #mbrofi.terminal_open(OPEN_CMD + " ~/gitland")
-
-#devices = get_devices()
-#print(if_removable(get_devices()[0][4]))
-#print(get_info(get_devices()[0][4], ['NAME','TYPE','PARTLABEL']))
-#print(get_info(get_devices()[0][4], 'NAME'))
